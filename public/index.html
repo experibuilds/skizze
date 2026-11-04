@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skizze – describe it, see the diagram</title>
+<meta name="description" content="Describe a system, flow or data model in plain German or English and get a live, editable Mermaid diagram.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F1EC; --surface:#FFFFFF; --ink:#141821; --muted:#5E6573; --line:#D8D4CB;
+  --accent:#1F6F5C; --onaccent:#FFFFFF; --gold:#B7791F; --soft:#FAF9F6; --err:#B3261E;
+  --grid:rgba(20,24,33,.06); color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1117; --surface:#161A22; --ink:#E6E9F0; --muted:#98A0B0; --line:#2A303C;
+    --accent:#5FD3B3; --onaccent:#08241D; --gold:#F2B544; --soft:#11151C; --err:#FF8A80;
+    --grid:rgba(230,233,240,.05); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --surface:#161A22; --ink:#E6E9F0; --muted:#98A0B0; --line:#2A303C;
+  --accent:#5FD3B3; --onaccent:#08241D; --gold:#F2B544; --soft:#11151C; --err:#FF8A80;
+  --grid:rgba(230,233,240,.05); color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 56px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px}
+h1{font:700 clamp(2.2rem,6vw,3.6rem)/1 "Space Grotesk",Inter,sans-serif;letter-spacing:-.03em;margin:0}
+h1 .dot{color:var(--accent)}
+.lede{color:var(--muted);margin:10px 0 0;max-width:60ch}
+.theme{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;width:40px;height:40px;cursor:pointer;font-size:1.1rem;flex:none}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+label.lbl{display:block;font-weight:600;margin-bottom:8px}
+textarea,select,input{font:inherit;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px}
+textarea{width:100%;min-height:170px;resize:vertical;padding:12px 14px;line-height:1.5}
+textarea.code{font:400 13px/1.55 "JetBrains Mono",ui-monospace,monospace;min-height:220px;white-space:pre;overflow:auto}
+select{padding:9px 10px}
+:is(textarea,select,input,button,a):focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.examples span{color:var(--muted);font-size:.88rem;align-self:center}
+.chip{border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:.85rem;cursor:pointer}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 14px;font:500 .92rem/1 Inter,sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.go{margin-left:auto;background:var(--accent);color:var(--onaccent);border-color:var(--accent);font-weight:600;padding:11px 20px}
+.go[disabled]{cursor:progress}
+.status{min-height:1.4em;margin:12px 2px 0;color:var(--muted);font-size:.9rem}
+.status.err{color:var(--err)}
+.preview{min-height:360px;display:flex;flex-direction:column}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.toolbar h2{font:700 1.15rem/1.2 "Space Grotesk",Inter,sans-serif;margin:0 auto 0 0;overflow-wrap:anywhere}
+.canvas{flex:1;border:1px solid var(--line);border-radius:10px;overflow:auto;padding:16px;display:flex;align-items:center;justify-content:center;min-height:320px;
+  background-color:var(--soft);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:20px 20px}
+.canvas svg{max-width:100%;height:auto}
+.empty{color:var(--muted);text-align:center;max-width:34ch}
+.refine{display:flex;gap:8px;margin-top:12px}
+.refine input{flex:1;min-width:0;padding:10px 12px}
+details{margin-top:14px}
+summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.codeerr{color:var(--err);font:400 12px/1.4 "JetBrains Mono",monospace;margin-top:6px;white-space:pre-wrap;min-height:1em}
+footer{color:var(--muted);font-size:.85rem;margin-top:28px}
+footer a{color:inherit}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px}
+@keyframes s{to{transform:rotate(1turn)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Skizze<span class="dot">.</span></h1>
+      <p class="lede">Describe a system, flow or data model in plain German or English — get a clean Mermaid diagram you can tweak, export, or paste into Confluence, Jira or GitHub.</p>
+    </div>
+    <button class="theme" id="theme" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <label class="lbl" for="text">What should the diagram show?</label>
+      <textarea id="text" placeholder="e.g. User logs in via the web app, the API checks the token with Keycloak, then reads orders from Postgres. If the token is invalid, redirect to login."></textarea>
+      <div class="examples">
+        <span>Try:</span>
+        <button class="chip" data-type="sequence" data-ex="Nutzer meldet sich in der Web-App an. Die App schickt die Daten an die API, die API prüft das Passwort bei Keycloak und gibt ein JWT zurück. Danach lädt die App das Dashboard.">🇩🇪 Login</button>
+        <button class="chip" data-type="flowchart" data-ex="Developer opens a PR on GitHub. CI runs lint and tests. If they fail, the dev fixes and pushes again. If they pass, a reviewer approves, it merges to main and Vercel deploys to production.">PR → deploy</button>
+        <button class="chip" data-type="er" data-ex="A customer has many orders. Each order has many order items. An order item references one product. Products belong to one category.">Shop DB</button>
+      </div>
+      <div class="row">
+        <label for="type" class="sr" style="font-size:.9rem;color:var(--muted)">Type</label>
+        <select id="type">
+          <option value="auto">Auto</option>
+          <option value="flowchart">Flowchart</option>
+          <option value="sequence">Sequence</option>
+          <option value="er">ER / data model</option>
+          <option value="class">Class</option>
+          <option value="state">State</option>
+          <option value="gantt">Gantt</option>
+          <option value="mindmap">Mindmap</option>
+        </select>
+        <button class="btn go" id="go">Draw it</button>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+
+      <details id="codebox">
+        <summary>Mermaid code (editable)</summary>
+        <textarea id="code" class="code" spellcheck="false" aria-label="Mermaid code"></textarea>
+        <div class="codeerr" id="codeerr"></div>
+      </details>
+    </section>
+
+    <section class="card preview">
+      <div class="toolbar">
+        <h2 id="title">Your diagram</h2>
+        <button class="btn" id="copy" disabled>Copy code</button>
+        <button class="btn" id="svg" disabled>SVG</button>
+        <button class="btn" id="png" disabled>PNG</button>
+        <a class="btn" id="live" aria-disabled="true" target="_blank" rel="noopener">mermaid.live ↗</a>
+      </div>
+      <div class="canvas" id="canvas"><p class="empty">Your diagram appears here. Tip: be concrete about who talks to whom and what happens on errors.</p></div>
+      <form class="refine" id="refine">
+        <input id="change" placeholder="Change it… e.g. “add a Redis cache before Postgres”" aria-label="Change request" disabled>
+        <button class="btn" id="apply" disabled>Apply</button>
+      </form>
+    </section>
+  </div>
+  <footer>Free & open source · <a href="https://github.com/experibuilds/skizze">GitHub</a> · Your text is sent to a free AI model to draw the diagram and isn't stored.</footer>
+</div>
+
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
+
+const $ = id => document.getElementById(id);
+const els = { text:$("text"), type:$("type"), go:$("go"), status:$("status"), code:$("code"), codeerr:$("codeerr"),
+  canvas:$("canvas"), title:$("title"), copy:$("copy"), svg:$("svg"), png:$("png"), live:$("live"),
+  change:$("change"), apply:$("apply"), refine:$("refine"), theme:$("theme") };
+const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+                set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
+
+// ---------- theme ----------
+const isDark = () => document.documentElement.dataset.theme
+  ? document.documentElement.dataset.theme === "dark"
+  : matchMedia("(prefers-color-scheme: dark)").matches;
+const savedTheme = store.get("skizze-theme");
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+els.theme.onclick = () => {
+  const next = isDark() ? "light" : "dark";
+  document.documentElement.dataset.theme = next; store.set("skizze-theme", next); render();
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => render());
+
+// ---------- mermaid ----------
+let n = 0, lastSvg = "";
+function init() {
+  mermaid.initialize({ startOnLoad:false, securityLevel:"strict", theme: isDark() ? "dark" : "default",
+    fontFamily:"Inter, system-ui, sans-serif", htmlLabels:false, flowchart:{ htmlLabels:false, curve:"basis" } });
+}
+async function valid(code) {
+  init();
+  try { await mermaid.parse(code); return null; } catch (e) { return String(e.message || e).slice(0, 500); }
+}
+async function render() {
+  const code = els.code.value.trim();
+  if (!code) return;
+  const err = await valid(code);
+  if (err) { els.codeerr.textContent = err; return false; }
+  els.codeerr.textContent = "";
+  try {
+    const { svg } = await mermaid.render("m" + (++n), code);
+    els.canvas.innerHTML = svg; lastSvg = svg;
+    setEnabled(true); updateLive(code); store.set("skizze-last", JSON.stringify({ code, title: els.title.textContent }));
+    return true;
+  } catch (e) {
+    els.codeerr.textContent = String(e.message || e).slice(0, 500);
+    document.querySelectorAll("[id^='dm']").forEach(x => x.remove());
+    return false;
+  }
+}
+function setEnabled(on) {
+  for (const b of [els.copy, els.svg, els.png, els.change, els.apply]) b.disabled = !on;
+  els.live.setAttribute("aria-disabled", String(!on));
+}
+
+// ---------- API ----------
+async function ask(payload) {
+  const r = await fetch("/api/diagram", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+  let d = {}; try { d = await r.json(); } catch {}
+  if (!r.ok) throw new Error(d.error || `Server error (${r.status})`);
+  return d;
+}
+function busy(on, msg) {
+  els.go.disabled = on; els.apply.disabled = on || !lastSvg;
+  els.status.className = "status"; els.status.innerHTML = on ? `<span class="spin"></span> ${msg}` : (msg || "");
+}
+function fail(e) { busy(false); els.status.className = "status err"; els.status.textContent = e.message || "Something went wrong"; }
+
+async function draw(payload, label) {
+  busy(true, label);
+  try {
+    let d = await ask(payload);
+    let err = await valid(d.code);
+    if (err) { // one automatic repair round
+      busy(true, "Fixing a syntax hiccup…");
+      const fixed = await ask({ current: d.code, error: err });
+      if (!(await valid(fixed.code))) d = { ...fixed, title: fixed.title || d.title };
+      else throw new Error("The AI produced invalid Mermaid twice — try rephrasing or pick a diagram type.");
+    }
+    els.code.value = d.code;
+    if (d.title) els.title.textContent = d.title;
+    await render();
+    busy(false, "Done. Edit the code or ask for a change below.");
+  } catch (e) { fail(e); }
+}
+
+els.go.onclick = () => {
+  const text = els.text.value.trim();
+  if (!text) { els.text.focus(); fail(new Error("Describe something first.")); return; }
+  draw({ text, type: els.type.value }, "Drawing…");
+};
+els.text.addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) els.go.click(); });
+els.refine.onsubmit = e => {
+  e.preventDefault();
+  const text = els.change.value.trim();
+  if (!text || !els.code.value.trim()) return;
+  draw({ text, current: els.code.value.trim() }, "Updating…").then(() => { if (!els.status.classList.contains("err")) els.change.value = ""; });
+};
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+  els.text.value = c.dataset.ex; els.type.value = c.dataset.type; els.go.click();
+});
+let t; els.code.addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 400); });
+
+// ---------- export ----------
+const fileName = ext => (els.title.textContent.trim() || "diagram").toLowerCase().replace(/[^a-z0-9äöüß]+/gi, "-").replace(/^-|-$/g, "") + "." + ext;
+function download(blob, name) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+function flash(btn, txt) { const o = btn.textContent; btn.textContent = txt; setTimeout(() => btn.textContent = o, 1400); }
+els.copy.onclick = async () => {
+  try { await navigator.clipboard.writeText("```mermaid\n" + els.code.value.trim() + "\n```"); flash(els.copy, "Copied ✓"); }
+  catch { els.code.closest("details").open = true; els.code.select(); flash(els.copy, "Select & copy"); }
+};
+els.svg.onclick = () => download(new Blob([lastSvg], { type:"image/svg+xml" }), fileName("svg"));
+els.png.onclick = () => {
+  const svgEl = els.canvas.querySelector("svg"); if (!svgEl) return;
+  const box = svgEl.viewBox.baseVal, w = box?.width || svgEl.clientWidth, h = box?.height || svgEl.clientHeight;
+  const clone = svgEl.cloneNode(true); clone.setAttribute("width", w); clone.setAttribute("height", h); clone.style.maxWidth = "none";
+  const img = new Image(), scale = 2;
+  img.onload = () => {
+    const c = document.createElement("canvas"); c.width = w * scale; c.height = h * scale;
+    const ctx = c.getContext("2d"); ctx.fillStyle = isDark() ? "#161A22" : "#FFFFFF"; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    try { c.toBlob(b => download(b, fileName("png"))); } catch { fail(new Error("PNG export blocked by the browser — use SVG instead.")); }
+  };
+  img.onerror = () => fail(new Error("PNG export failed — use SVG instead."));
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+};
+function updateLive(code) {
+  const state = JSON.stringify({ code, mermaid: JSON.stringify({ theme: isDark() ? "dark" : "default" }), autoSync: true, updateDiagram: true });
+  const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(state)));
+  els.live.href = "https://mermaid.live/edit#base64:" + b64;
+}
+els.live.addEventListener("click", e => { if (els.live.getAttribute("aria-disabled") === "true") e.preventDefault(); });
+
+// ---------- restore last diagram ----------
+try {
+  const last = JSON.parse(store.get("skizze-last") || "null");
+  if (last?.code) { els.code.value = last.code; if (last.title) els.title.textContent = last.title; render(); }
+} catch {}
+</script>
+</body>
+</html>

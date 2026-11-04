@@ -1,0 +1,10 @@
+{
+  "name": "skizze",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Describe a system in plain words (DE/EN) → live Mermaid diagram",
+  "engines": {
+    "node": ">=20"
+  }
+}
