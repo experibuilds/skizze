@@ -121,7 +121,7 @@ function buildProviders() {
   if (e.OPENROUTER_API_KEY) {
     for (const m of (e.OPENROUTER_MODELS || "openrouter/free").split(","))
       list.push(openAI("openrouter", "https://openrouter.ai/api/v1/chat/completions", e.OPENROUTER_API_KEY, m.trim(),
-        { "HTTP-Referer": "https://skizze.vercel.app", "X-Title": "Skizze" }, 15_000)); // free router is slower
+        { "HTTP-Referer": "https://skizze-app.vercel.app", "X-Title": "Skizze" }, 15_000)); // free router is slower
   }
   return list;
 }
