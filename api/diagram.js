@@ -85,10 +85,13 @@ Description:
 }
 
 function clean(code) {
-  return String(code || "")
+  let c = String(code || "")
     .replace(/^\s*```(?:mermaid)?\s*/i, "").replace(/```\s*$/, "")
     .replace(/%%\{[\s\S]*?\}%%\s*/g, "")
     .trim();
+  if (/^(flowchart|graph)\b/.test(c)) // common model slip: `A --|"x"|--> B` or `A --|"x"| B`
+    c = c.replace(/(\s)--\|([^|\n]*)\|-->/g, "$1-->|$2|").replace(/(\s)--\|/g, "$1-->|");
+  return c;
 }
 
 // Providers in order: Groq (fast) → OpenRouter free.
